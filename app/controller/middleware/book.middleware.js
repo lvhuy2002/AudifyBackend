@@ -5,15 +5,15 @@ const User = db.user;
 const Book = db.book;
 const Category = db.category;
 const History = db.history;
-
+const Chapter = db.chapter;
 const commonExecute = require("../executeDB/common.execute.js");
 
 
 exports.createBook = async (req, res) => {
     let file = req.file;
-    let {title, description, content, author, category} = req.body;
-    if (title === undefined || description === undefined || content === undefined || author === undefined || category === undefined
-        || title === "" || description === "" || content === "" || author === "" || category === "") {
+    let {title, description, author, category, chapter} = req.body;
+    if (title === undefined || description === undefined || chapter === undefined || author === undefined || category === undefined
+        || title === "" || description === "" || chapter.length === 0 || author === "" || category === "") {
             return res.status(400).send({ message: "Missing field!" })
     }
 
@@ -30,24 +30,11 @@ exports.createBook = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when find category", err: dataCategory.err})
     }
 
-    // // kiem tra nếu chưa có tác giả thì thêm tác giả
-    // let conditionAuthor = {
-    //     name: author
-    // }
-    // let valueAuthor = {
-    //     name: author
-    // }
-    // let dataAuthor = await commonExecute.findOrCreateData(Author, conditionAuthor, valueAuthor) 
-    // if (dataAuthor.code == -2) {
-    //     return res.status(400).send({ message: "Error occurred when find or create author" })
-    // }
-
     // them book
     let valueBook = {
         categoryId: dataCategory.categoryId,
         title: title,
         description: description,
-        content: content,
         author: author,
         coverImgURL: file.path.replace(/\\/g, "/")
     }
@@ -55,22 +42,36 @@ exports.createBook = async (req, res) => {
     if (dataBook.code == -2) {
         return res.status(400).send({ message: "Error occurred when create book", err: dataBook.err })
     }
+
+    let valueChapter = [];
+    for (var i = 0; i < chapter.length; i++) {
+        valueChapter.push({
+            bookId: dataBook.bookId,
+            content: chapter[i],
+            number: i + 1
+        })
+    }
+
+    let dataChapter = await commonExecute.createManyData(Chapter, valueChapter);
+    if (dataChapter.code == -2) {
+        return res.status(400).send({ message: "Error occurred when create chapter", err: dataChapter.err })
+    }
+     
+    for (var i = 0; i < dataChapter.length;  i++) {
+        delete dataChapter[i].dataValues.chapterId;
+        delete dataChapter[i].dataValues.bookId;
+        delete dataChapter[i].dataValues.createdAt;
+        delete dataChapter[i].dataValues.updatedAt;
+    }
+    
     dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
     dataBook.category = dataCategory.name;
-    // // them data bieu thi su lien ket giua author va book
-    // let valueBookOfAuthor = {
-    //     bookId: dataBook.bookId,
-    //     authorId: dataAuthor.authorId
-    // }
-    // let dataBookOfAuthor = await commonExecute.createData(BookOfAuthor, valueBookOfAuthor)
-    // if (dataBookOfAuthor.code == -2) {
-    //     return res.status(400).send({ message: "Error occurred when create data association between book and author" })
-    // }
+    dataBook.chapter = dataChapter
     return res.status(200).send(dataBook)
 }
 
 exports.getBook = async (req, res) => {
-    let {bookId} = req.body;
+    let {bookId} = req.params;
     if (bookId === undefined || bookId === "") {
         return res.status(400).send({ message: "Missing field!" })
     }
@@ -107,7 +108,7 @@ exports.getBook = async (req, res) => {
 }
 
 exports.getFullBook = async (req, res) => {
-    let {bookId} = req.body;
+    let {bookId} = req.params;
     if (bookId === undefined || bookId === "") {
         return res.status(400).send({ message: "Missing field!" })
     }
@@ -124,7 +125,14 @@ exports.getFullBook = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when finding book", err: dataCategory.err})
     }
 
-    
+    let valueView = {
+        view: dataBook.view + 1
+    }
+    let result = await commonExecute.updateData(Book, valueView , conditionBook) 
+    if (result.code === -2) {
+        return res.status(400).send({ message: "Can't update view" })
+    }
+
     // tim category
     let conditionCategory = {
         categoryId: dataBook.categoryId
@@ -137,10 +145,29 @@ exports.getFullBook = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when find category", err: dataCategory.err})
     }
 
-    // tim category
+    // tim chapter
+    let conditionChapter = {
+        bookId: bookId
+    }
+    
+    let dataChapter = await commonExecute.findManyData(Chapter, conditionChapter) 
+    if (dataChapter.length === 0) {
+        return res.status(500).send({ message: "There are no chapter of this book in database", err: dataCategory.err})
+    }
+    if (dataChapter.code === -2) {
+        return res.status(500).send({ message: "Error occurred when find chapter", err: dataCategory.err})
+    }
+    for (var i = 0; i < dataChapter.length;  i++) {
+        delete dataChapter[i].dataValues.chapterId;
+        delete dataChapter[i].dataValues.bookId;
+        delete dataChapter[i].dataValues.createdAt;
+        delete dataChapter[i].dataValues.updatedAt;
+    }
+
+    // them vao history
     let valueHistory = {
-        userUserId: req.dataAccount.userId,
-        bookBookId: dataBook.bookId
+        userId: req.dataAccount.userId,
+        bookId: dataBook.bookId
     }
     let dataHistory = await commonExecute.createData(History, valueHistory)
     if (dataHistory.code == -2) {
@@ -149,15 +176,16 @@ exports.getFullBook = async (req, res) => {
 
     dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
     dataBook.category = dataCategory.name;
+    dataBook.chapter = dataChapter;
     return res.status(200).send(dataBook)
 }
 
 exports.updateBook = async (req, res) => {
-    let {bookId, title, description, content, author, category} = req.body;
+    let {bookId, title, description, author, category} = req.body;
     if (bookId === undefined || bookId === "") {
         return res.status(400).send({ message: "Missing field" })
     }
-    if (title === undefined && description === undefined && content === undefined && author === undefined && category === undefined) {
+    if (title === undefined && description === undefined && author === undefined && category === undefined) {
         return res.status(400).send({ message: "Nothing to change" })
     }
     let categoryId = undefined;
@@ -184,7 +212,6 @@ exports.updateBook = async (req, res) => {
         categoryId: categoryId,
         title: title,
         description: description,
-        content: content,
         author: author,
     }
 
@@ -208,8 +235,13 @@ exports.deleteBook = async (req, res) => {
     let condition = {
         bookId: bookId
     }
-    let result = commonExecute.deleteData(Book, condition)
-    if (result.code === -2) {
+
+    let resultChapter = commonExecute.deleteData(Chapter, condition)
+    if (resultChapter.code === -2) {
+        return res.status(500).send({ message: "Error occurred when delete book", err: result.err})
+    }
+    let resultBook = commonExecute.deleteData(Book, condition)
+    if (resultBook.code === -2) {
         return res.status(500).send({ message: "Error occurred when delete book", err: result.err})
     }
     return res.status(200).send({ message: "Delete successfully" }) 

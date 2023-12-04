@@ -17,9 +17,9 @@ const upload = multer({ storage })
 router.post('/createBook', upload.single("image"), bookMiddleware.createBook ); 
 
 // get book
-router.get('/getBook', bookMiddleware.getBook)
+router.get('/getBook/:bookId', bookMiddleware.getBook)
 
-router.get('/getFullBook', userMiddleware.authorizationJWT, bookMiddleware.getFullBook);
+router.get('/getFullBook/:bookId', userMiddleware.authorizationJWT, bookMiddleware.getFullBook);
 
 // update book
 router.post('/updateBook', bookMiddleware.updateBook); 

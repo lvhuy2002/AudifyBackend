@@ -23,12 +23,11 @@ db.category = require("./category.model.js")(sequelize, DataTypes);
 db.history = require("./history.model.js")(sequelize, DataTypes);
 db.playlist = require("./playlist.model.js")(sequelize, DataTypes);
 db.user = require("./user.model.js")(sequelize, DataTypes);
-//db.chapter = require("./chapter.model.js")(sequelize, DataTypes);
+db.chapter = require("./chapter.model.js")(sequelize, DataTypes);
 db.assess = require("./assess.model.js")(sequelize, DataTypes);
 
-//db.author.associate(db);
 db.book.associate(db);
-//db.chapter.associate(db);
+db.chapter.associate(db);
 db.category.associate(db);
 db.playlist.associate(db);
 db.user.associate(db);

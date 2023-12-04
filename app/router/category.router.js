@@ -5,7 +5,8 @@ const categoryMiddleware = require("../controller/middleware/category.middleware
 // register an user account:
 router.post('/createCategory', categoryMiddleware.createCategory ); 
 
-
+// get category list an user account:
+router.get('/getCategoryList', categoryMiddleware.getCategoryList ); 
 //TODO: tìm book theo các tiêu chí
 
 module.exports = router

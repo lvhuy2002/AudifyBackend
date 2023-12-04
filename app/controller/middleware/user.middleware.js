@@ -8,6 +8,7 @@ const User = db.user;
 const commonExecute = require("../executeDB/common.execute.js");
 
 exports.register = async (req, res) => {
+    // kiem tra các các property của req
     let {email, password, firstName, lastName} = req.body;
     if (password === undefined || firstName === undefined || lastName === undefined || email === undefined
         || password === "" || firstName === "" || lastName === "" || email === "") {
@@ -90,6 +91,7 @@ exports.login = async (req, res) => {
 exports.authorizationJWT = async (req, res, next) => {
     const authHeader = req.header('Authorization')
     // cat chuoi "bearer" ra chi lay token
+
     const token = authHeader && authHeader.split(' ')[1]
 
     if (!token) {
@@ -130,18 +132,17 @@ exports.getInfo = async (req, res) => {
 
 exports.changeInfo = async (req, res) => {
     const dataAccount = req.dataAccount;
-    const {firstName, lastName, email} = req.body
-    const {userId} = dataAccount;
-    if (firstName == undefined && lastName == undefined && email == undefined) {
+    const {firstName, lastName} = req.body
+    const {email} = dataAccount;
+    if (firstName == undefined && lastName == undefined) {
         return res.status(400).send({ message: "Nothing to change!" })
     }
     let condition = {
-        userId: userId
+        email: email
     }
     let value = {
         firstName: firstName,
         lastName: lastName,
-        email: email
     }
     let resultUpdate = commonExecute.updateData(User, value, condition);
     if (resultUpdate.code === -1) {

@@ -25,6 +25,8 @@ app.use('/img', express.static('./img'));
 app.use("/api/user", require("./app/router/user.router.js"))
 app.use("/api/book", require("./app/router/book.router.js"))
 app.use("/api/category", require("./app/router/category.router.js"))
+app.use("/api/playlist", require("./app/router/playlist.router.js"))
+app.use("/api/assess", require("./app/router/assess.router.js"))
 // app.get('/*', function (req, res) {
 //     res.sendFile(path.join(__dirname, 'public/index.html'))
 // })
