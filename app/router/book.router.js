@@ -27,7 +27,8 @@ router.post('/updateBook', bookMiddleware.updateBook);
 // delete account
 router.post('/deleteBook', bookMiddleware.deleteBook); 
 
-
+// get bookList
+router.get('/getTopBookRate', bookMiddleware.getTopBookRate); 
 
 //TODO: tìm book theo các tiêu chí
 

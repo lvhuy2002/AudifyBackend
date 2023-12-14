@@ -3,10 +3,12 @@ const util = require("../util.js")
 
 const User = db.user;
 const Book = db.book;
+const Assess = db.assess;
 const Category = db.category;
 const History = db.history;
 const Chapter = db.chapter;
 const commonExecute = require("../executeDB/common.execute.js");
+const specifiedExecute = require("../executeDB/specified.execute.js");
 
 
 exports.createBook = async (req, res) => {
@@ -101,8 +103,28 @@ exports.getBook = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when find category", err: dataCategory.err})
     }
 
+    // lay comment
+
+    let dataBookUser = await specifiedExecute.getAssessOfBook(Book, User, {bookId: bookId})
+    if (dataBookUser.code == -2) {
+        return res.status(500).send({ message: "Error occurred when get assess of book", err: dataBookUser.err})
+    }
+    let dataAssess = dataBookUser[0].dataValues.users;
+    for (let assess of dataAssess) {
+        assess.dataValues.comment = assess.assess.dataValues.comment;
+        assess.dataValues.rate = assess.assess.dataValues.rate;
+        delete assess.dataValues.assess;
+        delete assess.dataValues.email;
+        delete assess.dataValues.password;
+        delete assess.dataValues.resetCode;
+        delete assess.dataValues.timeOfResetCode;
+        delete assess.dataValues.createdAt;
+        delete assess.dataValues.updatedAt;
+
+    }
     dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
     dataBook.category = dataCategory.name;
+    dataBook.assess = dataAssess
     delete dataBook.content;
     return res.status(200).send(dataBook)
 }
@@ -173,10 +195,29 @@ exports.getFullBook = async (req, res) => {
     if (dataHistory.code == -2) {
         return res.status(400).send({ message: "Error occurred when create history", err: dataHistory.err })
     }
+     // lay comment
 
+     let dataBookUser = await specifiedExecute.getAssessOfBook(Book, User, {bookId: bookId})
+     if (dataBookUser.code == -2) {
+         return res.status(500).send({ message: "Error occurred when get assess of book", err: dataBookUser.err})
+     }
+     let dataAssess = dataBookUser[0].dataValues.users;
+     for (let assess of dataAssess) {
+        assess.dataValues.comment = assess.assess.dataValues.comment;
+        assess.dataValues.rate = assess.assess.dataValues.rate;
+        delete assess.dataValues.assess;
+        delete assess.dataValues.email;
+        delete assess.dataValues.password;
+        delete assess.dataValues.resetCode;
+        delete assess.dataValues.timeOfResetCode;
+        delete assess.dataValues.createdAt;
+        delete assess.dataValues.updatedAt;
+ 
+     }
     dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
     dataBook.category = dataCategory.name;
     dataBook.chapter = dataChapter;
+    dataBook.assess = dataAssess;
     return res.status(200).send(dataBook)
 }
 
@@ -245,4 +286,18 @@ exports.deleteBook = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when delete book", err: result.err})
     }
     return res.status(200).send({ message: "Delete successfully" }) 
+}
+
+exports.getTopBookRate = async (req, res) => {
+    try {
+        const topBooks = await Book.findAll({
+            order: [['rate', 'DESC']],
+            limit: 10,
+          });
+        //console.log(topBooks)
+        return res.status(200).send(topBooks)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
 }

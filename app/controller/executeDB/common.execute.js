@@ -1,4 +1,4 @@
-
+const db = require("../../model/index.js");
 exports.createData = (model, value) => {
     return model.create(value).then(data => {
         return data.dataValues
@@ -72,3 +72,23 @@ exports.findOrCreateData = (model, condition, value) => {
     })
 }
 
+exports.countData = (model, condition) => {
+    return model.count({
+        where: condition
+    }).then (data => {
+        return data;
+    }).catch(err => {
+        return {code: -2, err: err.message}
+    })
+}
+
+exports.averageData = (model, colName, condition) => {
+    return model.findOne({
+        where: condition,
+        attributes: [[db.sequelize.fn('AVG', db.sequelize.col(colName)), 'average']]
+    }).then (data => {
+        return data.dataValues.average
+    }).catch(err => {
+        return {code: -2, err: err.message}
+    })
+}
