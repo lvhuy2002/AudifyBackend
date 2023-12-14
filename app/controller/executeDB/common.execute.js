@@ -71,4 +71,3 @@ exports.findOrCreateData = (model, condition, value) => {
         return {code: -2, err: err.message}
     })
 }
-

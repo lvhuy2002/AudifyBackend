@@ -27,6 +27,9 @@ router.post('/updateBook', bookMiddleware.updateBook);
 // delete account
 router.post('/deleteBook', bookMiddleware.deleteBook); 
 
+// find at mót 3 books with similar results
+router.get('/searchBook', bookMiddleware.searchBook);
+
 
 
 //TODO: tìm book theo các tiêu chí
