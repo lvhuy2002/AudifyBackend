@@ -14,23 +14,33 @@ const specifiedExecute = require("../executeDB/specified.execute.js");
 
 exports.searchBook = async (req, res) => {
     const { keyword } = req.query;
-
+    
     try {
         const allBooks = await Book.findAll();
+        if (keyword === "") {
+            for (let book of allBooks) {
+                book.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.dataValues.coverImgURL ;
+            }
+            return res.json(allBooks);
+        }
 
         const options = {
             keys: ['title', 'author'],
             threshold: 0.3,
         };
-
+        
         const fuse = new Fuse(allBooks, options);
 
         const result = fuse.search(keyword);
-
-        res.json(result.slice(0, 3));
+        let resp = []
+        for (let book of result) {
+            book.item.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.item.dataValues.coverImgURL ;
+            resp.push(book.item)
+        }
+        return res.json(resp);
     } catch (error) {
         console.error('Error occurred while searching for books:', error);
-        res.status(500).json({ error: 'Failed to retrieve books' });
+        return res.status(500).json({ error: 'Failed to retrieve books' });
     }
 }
 
@@ -136,6 +146,7 @@ exports.getBook = async (req, res) => {
     for (let assess of dataAssess) {
         assess.dataValues.comment = assess.assess.dataValues.comment;
         assess.dataValues.rate = assess.assess.dataValues.rate;
+        assess.dataValues.imgURL =  req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
         delete assess.dataValues.assess;
         delete assess.dataValues.email;
         delete assess.dataValues.password;
@@ -228,6 +239,7 @@ exports.getFullBook = async (req, res) => {
      for (let assess of dataAssess) {
         assess.dataValues.comment = assess.assess.dataValues.comment;
         assess.dataValues.rate = assess.assess.dataValues.rate;
+        assess.dataValues.imgURL =  req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
         delete assess.dataValues.assess;
         delete assess.dataValues.email;
         delete assess.dataValues.password;
@@ -317,6 +329,9 @@ exports.getTopBookRate = async (req, res) => {
             order: [['rate', 'DESC']],
             limit: 10,
           });
+        for (let book of topBooks) {
+            book.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.dataValues.coverImgURL ;
+        }
         //console.log(topBooks)
         return res.status(200).send(topBooks)
     } catch (err) {
