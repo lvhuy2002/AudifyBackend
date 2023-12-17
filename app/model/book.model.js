@@ -31,7 +31,7 @@ module.exports = (sequelize, dataTypes) => {
             allowNull: false
         },
         coverImgURL: {
-            type: dataTypes.STRING,
+            type: dataTypes.TEXT,
             allowNull: false
         }
     })

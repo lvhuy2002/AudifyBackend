@@ -24,7 +24,7 @@ module.exports = (sequelize, dataTypes) => {
             allowNull: false
         },
         imgURL: {
-            type: dataTypes.STRING,
+            type: dataTypes.TEXT,
             allowNull: false
         },
         resetCode: {
