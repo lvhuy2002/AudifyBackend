@@ -4,6 +4,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 // tao db
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
+    port: dbConfig.PORT,
     dialect: dbConfig.dialect,
     timezone: dbConfig.timezone,
     define: {

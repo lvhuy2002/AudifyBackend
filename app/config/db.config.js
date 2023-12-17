@@ -1,7 +1,8 @@
 module.exports = {
     HOST: "localhost",
+    PORT: 3306,
     USER: "root",
-    PASSWORD: "Yuurei@2803",
+    PASSWORD: "1234",
     DB: "audify",
     dialect: "mysql",
     timezone: "Asia/Ho_Chi_Minh",

@@ -73,3 +73,7 @@ exports.sendEmail = ( senderEmail, recipientEmail, password, code) => {
     })
     return {code: 1}
 }
+
+exports.collaborativeFiltering = (data) => {
+
+}

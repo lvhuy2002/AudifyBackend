@@ -23,6 +23,11 @@ module.exports = (sequelize, dataTypes) => {
             through: models.bookOfPlaylist,
             foreignKey: 'playlistId',
         })
+        playlist.belongsTo(models.user, {
+            foreignKey: 'userId',
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE'
+        })
     }
     return playlist;
 }

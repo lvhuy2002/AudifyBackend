@@ -49,6 +49,11 @@ module.exports = (sequelize, dataTypes) => {
             through: models.assess,
             foreignKey: 'userId',
         })
+        user.hasMany(models.playlist,  {
+            foreignKey: 'userId',
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE'
+        })
     }
     return user;
 }
