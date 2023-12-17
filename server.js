@@ -38,6 +38,7 @@ app.listen(PORT, () => {
 
 
 const db = require("./app/model")
+
 //db.sequelize.sync({ force: true })
 db.sequelize.sync();
 //db.sequelize.sync({ alter: true });

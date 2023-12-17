@@ -72,6 +72,7 @@ exports.findOrCreateData = (model, condition, value) => {
     })
 }
 
+
 exports.countData = (model, condition) => {
     return model.count({
         where: condition
@@ -92,3 +93,4 @@ exports.averageData = (model, colName, condition) => {
         return {code: -2, err: err.message}
     })
 }
+

@@ -1,5 +1,7 @@
 const db = require("../../model/index.js");
 const util = require("../util.js")
+const Fuse = require('fuse.js');
+const { Op, literal } = require('sequelize')
 
 const User = db.user;
 const Book = db.book;
@@ -10,6 +12,27 @@ const Chapter = db.chapter;
 const commonExecute = require("../executeDB/common.execute.js");
 const specifiedExecute = require("../executeDB/specified.execute.js");
 
+exports.searchBook = async (req, res) => {
+    const { keyword } = req.query;
+
+    try {
+        const allBooks = await Book.findAll();
+
+        const options = {
+            keys: ['title', 'author'],
+            threshold: 0.3,
+        };
+
+        const fuse = new Fuse(allBooks, options);
+
+        const result = fuse.search(keyword);
+
+        res.json(result.slice(0, 3));
+    } catch (error) {
+        console.error('Error occurred while searching for books:', error);
+        res.status(500).json({ error: 'Failed to retrieve books' });
+    }
+}
 
 exports.createBook = async (req, res) => {
     let file = req.file;
