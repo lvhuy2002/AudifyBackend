@@ -143,7 +143,7 @@ exports.getBooks = async (req, res) => {
     let result = await specifiedExecute.getBookFromPlaylist(Playlist, Book, condition)
     console.log(result);
     for (let book of result[0].dataValues.books) {
-        book.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.dataValues.coverImgURL ;
+        book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL); ;
     }
     if (result === -2) {
         return res.status(500).send({ message: "Error occurred when remove book from playlist", err: result.err})

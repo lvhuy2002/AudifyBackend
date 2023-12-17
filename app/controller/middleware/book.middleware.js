@@ -19,7 +19,7 @@ exports.searchBook = async (req, res) => {
         const allBooks = await Book.findAll();
         if (keyword === "") {
             for (let book of allBooks) {
-                book.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.dataValues.coverImgURL ;
+                book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL) ;
             }
             return res.json(allBooks);
         }
@@ -34,7 +34,7 @@ exports.searchBook = async (req, res) => {
         const result = fuse.search(keyword);
         let resp = []
         for (let book of result) {
-            book.item.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.item.dataValues.coverImgURL ;
+            book.item.dataValues.coverImgURL = util.addHost(req, book.item.dataValues.coverImgURL) ;
             resp.push(book.item)
         }
         return res.json(resp);
@@ -99,7 +99,7 @@ exports.createBook = async (req, res) => {
         delete dataChapter[i].dataValues.updatedAt;
     }
     
-    dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
+    dataBook.coverImgURL = util.addHost(req, dataBook.coverImgURL);
     dataBook.category = dataCategory.name;
     dataBook.chapter = dataChapter
     return res.status(200).send(dataBook)
@@ -146,7 +146,7 @@ exports.getBook = async (req, res) => {
     for (let assess of dataAssess) {
         assess.dataValues.comment = assess.assess.dataValues.comment;
         assess.dataValues.rate = assess.assess.dataValues.rate;
-        assess.dataValues.imgURL =  req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
+        assess.dataValues.imgURL = req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
         delete assess.dataValues.assess;
         delete assess.dataValues.email;
         delete assess.dataValues.password;
@@ -156,7 +156,7 @@ exports.getBook = async (req, res) => {
         delete assess.dataValues.updatedAt;
 
     }
-    dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
+    dataBook.coverImgURL = util.addHost(req,dataBook.coverImgURL);
     dataBook.category = dataCategory.name;
     dataBook.assess = dataAssess
     delete dataBook.content;
@@ -239,7 +239,7 @@ exports.getFullBook = async (req, res) => {
      for (let assess of dataAssess) {
         assess.dataValues.comment = assess.assess.dataValues.comment;
         assess.dataValues.rate = assess.assess.dataValues.rate;
-        assess.dataValues.imgURL =  req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
+        assess.dataValues.imgURL = req.protocol + '://' + req.get('host') + '/' + assess.dataValues.imgURL;
         delete assess.dataValues.assess;
         delete assess.dataValues.email;
         delete assess.dataValues.password;
@@ -249,7 +249,7 @@ exports.getFullBook = async (req, res) => {
         delete assess.dataValues.updatedAt;
  
      }
-    dataBook.coverImgURL = req.protocol + '://' + req.get('host') + '/' + dataBook.coverImgURL;
+    dataBook.coverImgURL = util.addHost(req, dataBook.coverImgURL );
     dataBook.category = dataCategory.name;
     dataBook.chapter = dataChapter;
     dataBook.assess = dataAssess;
@@ -330,7 +330,7 @@ exports.getTopBookRate = async (req, res) => {
             limit: 10,
           });
         for (let book of topBooks) {
-            book.dataValues.coverImgURL = req.protocol + '://' + req.get('host') + '/' + book.dataValues.coverImgURL ;
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
         }
         //console.log(topBooks)
         return res.status(200).send(topBooks)

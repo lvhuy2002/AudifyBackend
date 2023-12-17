@@ -77,3 +77,8 @@ exports.sendEmail = ( senderEmail, recipientEmail, password, code) => {
 exports.collaborativeFiltering = (data) => {
 
 }
+
+exports.addHost = (req, data) => {
+    //return data
+    return req.protocol + '://' + req.get('host') + '/' + data ;
+}
