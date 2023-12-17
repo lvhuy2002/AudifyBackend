@@ -1,14 +1,17 @@
 const router = require("express").Router();
 const userMiddleware = require("../controller/middleware/user.middleware.js");
-const playlistMiddleware = require("../controller/middleware/playlist.middleware.js");
+const assessMiddleware = require("../controller/middleware/assess.middleware.js");
 
 // 
-router.post('/createAssess', userMiddleware.authorizationJWT,); 
+router.post('/createAssess', userMiddleware.authorizationJWT, assessMiddleware.createAssess); 
 
 // 
-router.get('/updateAssess', userMiddleware.authorizationJWT,); 
+router.get('/getAssess/:bookId', userMiddleware.authorizationJWT, assessMiddleware.getAssess); 
+
+// 
+router.post('/updateAssess', userMiddleware.authorizationJWT,  assessMiddleware.updateAssess); 
 
 //
-router.post('/removeAssess', userMiddleware.authorizationJWT,);
+router.post('/removeAssess', userMiddleware.authorizationJWT, assessMiddleware.removeAssess);
 
 module.exports = router
