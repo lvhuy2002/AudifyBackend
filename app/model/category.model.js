@@ -8,7 +8,8 @@ module.exports = (sequelize, dataTypes) => {
         },
         name: {            
             type: dataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
     })
     category.associate = function(models) {

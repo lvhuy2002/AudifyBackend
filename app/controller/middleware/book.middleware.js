@@ -326,7 +326,9 @@ exports.deleteBook = async (req, res) => {
 exports.getTopBookRate = async (req, res) => {
     try {
         const topBooks = await Book.findAll({
+
             order: [['rate', 'DESC']],
+            group: ['book.bookId'],
             limit: 10,
           });
         for (let book of topBooks) {
@@ -334,6 +336,74 @@ exports.getTopBookRate = async (req, res) => {
         }
         //console.log(topBooks)
         return res.status(200).send(topBooks)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+}
+
+exports.getNewestBook = async (req, res) => {
+    try {
+        const newestBooks = await Book.findAll({
+            order: [['createdAt', 'DESC']],
+            limit: 10,
+          });
+        for (let book of newestBooks) {
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+        }
+        //console.log(topBooks)
+        return res.status(200).send(newestBooks)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+}
+
+exports.getBestSellerBook = async (req, res) => {
+    try {
+        const newestBooks = await Book.findAll({
+            order: [['view', 'DESC'], ['rate', 'DESC']],
+            limit: 10,
+          });
+        for (let book of newestBooks) {
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+        }
+        //console.log(topBooks)
+        return res.status(200).send(newestBooks)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+}
+
+exports.getTrendingBook = async (req, res) => {
+    try {
+        const sevenDayAgo = new Date();
+        sevenDayAgo.setDate(sevenDayAgo.getDate() - 7);
+
+        const trendingBook = await Book.findAll({
+            attributes: {
+                exclude: ["histories.historyId", "histories.userId", "histories.createdAt", "histories.updatedAt"],
+                include: [[db.sequelize.fn("COUNT", db.sequelize.col("histories.bookId")), "view7Day"]]
+            },
+            include: [{
+                model: History, 
+                attributes: [],
+                where: {
+                    createdAt: {
+                        [Op.gte]: sevenDayAgo
+                    }
+                },
+                required: false
+            }],
+            group: ['book.bookId'],
+            order: [[literal('view7Day'), 'DESC']],
+            limit: 10
+        })
+        for (let book of trendingBook) {
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+        }
+        return res.status(200).send(trendingBook) 
     } catch (err) {
         console.log(err)
         return res.status(500).send(err)

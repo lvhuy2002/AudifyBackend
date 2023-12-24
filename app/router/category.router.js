@@ -7,6 +7,11 @@ router.post('/createCategory', categoryMiddleware.createCategory );
 
 // get category list an user account:
 router.get('/getCategoryList', categoryMiddleware.getCategoryList ); 
-//TODO: tìm book theo các tiêu chí
+
+// get category list an user account:
+router.get('/getBook', categoryMiddleware.getBook ); 
+
+
+
 
 module.exports = router

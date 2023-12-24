@@ -34,7 +34,12 @@ router.get('/searchBook', bookMiddleware.searchBook);
 // get bookList
 router.get('/getTopBookRate', bookMiddleware.getTopBookRate); 
 
+// get bookList
+router.get('/getNewestBook', bookMiddleware.getNewestBook); 
 
-//TODO: tìm book theo các tiêu chí
+// get bookList
+router.get('/getBestSellerBook', bookMiddleware.getBestSellerBook);
 
+// get bookList
+router.get('/getTrendingBook', bookMiddleware.getTrendingBook);
 module.exports = router

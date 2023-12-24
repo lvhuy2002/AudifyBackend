@@ -47,3 +47,15 @@ exports.getCategoryList = async (req, res) => {
     }
     return res.status(200).send(dataCategory)
 }
+
+
+exports.getBook = async (req, res) => {
+    let dataCategory = await commonExecute.findManyData(Category, {})
+    if (!dataCategory.length) {
+        return res.status(500).send({ message: "There are no categories in db"}) 
+    }
+    if (dataCategory.code === -2) {
+        return res.status(500).send({ message: "Failed to create category", err: dataAccount.err })
+    }
+    return res.status(200).send(dataCategory)
+}
