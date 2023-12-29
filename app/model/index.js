@@ -27,11 +27,12 @@ db.user = require("./user.model.js")(sequelize, DataTypes);
 db.chapter = require("./chapter.model.js")(sequelize, DataTypes);
 db.assess = require("./assess.model.js")(sequelize, DataTypes);
 
-db.book.associate(db);
+
 db.chapter.associate(db);
 db.category.associate(db);
 db.playlist.associate(db);
 db.user.associate(db);
+db.book.associate(db);
 
 
 module.exports = db;

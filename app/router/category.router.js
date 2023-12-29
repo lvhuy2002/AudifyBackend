@@ -8,10 +8,6 @@ router.post('/createCategory', categoryMiddleware.createCategory );
 // get category list an user account:
 router.get('/getCategoryList', categoryMiddleware.getCategoryList ); 
 
-// get category list an user account:
-router.get('/getBook', categoryMiddleware.getBook ); 
-
-
 
 
 module.exports = router

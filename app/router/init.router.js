@@ -1,9 +1,9 @@
 const router = require("express").Router();
-const userMiddleware = require("../controller/middleware/user.middleware.js");
+const initMiddleware = require("../controller/middleware/init.middleware.js");
 const playlistMiddleware = require("../controller/middleware/playlist.middleware.js");
 
 // 
-router.post('/initData', userMiddleware.authorizationJWT,); 
+router.post('/initData', initMiddleware.init); 
 
 
 module.exports = router

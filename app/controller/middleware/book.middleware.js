@@ -2,6 +2,7 @@ const db = require("../../model/index.js");
 const util = require("../util.js")
 const Fuse = require('fuse.js');
 const { Op, literal } = require('sequelize')
+var jsrecommender = require("js-recommender");
 
 const User = db.user;
 const Book = db.book;
@@ -336,6 +337,120 @@ exports.getTopBookRate = async (req, res) => {
         }
         //console.log(topBooks)
         return res.status(200).send(topBooks)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+}
+
+exports.getRecentBook = async (req, res) => {
+    try {
+        const userHistory = await History.findAll({
+            where: {
+                userId: req.dataAccount.userId
+            },
+            order: [['createdAt', 'DESC']],
+            limit: 10
+        })
+        let bookIds = [];
+        for (let history of userHistory) {
+            bookIds.push(history.dataValues.bookId)
+        }
+        console.log(bookIds);
+        const recentBook = await Book.findAll({
+            where: {
+                bookId: {
+                    [Op.in]: bookIds
+                }
+            }
+        })
+        for (let book of recentBook) {
+            //console.log(book);
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+        }
+        return res.status(200).send(recentBook) 
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(err)
+    }
+}
+
+exports.getRecommendBook = async (req, res) => {
+    try {
+        const countView = await History.findAll({
+            attributes: {
+                exclude: ["historyId", "createdAt", "updatedAt"],
+                include: [[db.sequelize.fn("COUNT", db.sequelize.col("bookId")), "view"]]
+            }, 
+
+            group: ['userId', 'bookId'],
+        });
+        let isListened = false;
+        for (let data of countView) {
+            if (req.dataAccount.userId === data.dataValues.userId) {
+                isListened = true;
+                break;
+            }
+        }
+        if (!isListened) {
+            const topBooks = await Book.findAll({
+
+                order: [['rate', 'DESC']],
+                group: ['book.bookId'],
+                limit: 10,
+              });
+            for (let book of topBooks) {
+                book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+            }
+            //console.log(topBooks)
+            return res.status(200).send(topBooks)
+        }
+
+        let recommender = new jsrecommender.Recommender();
+        console.log(recommender)
+        let table = new jsrecommender.Table();
+
+        for (let data of countView) {
+            table.setCell(data.dataValues.bookId.replace(/-/g, ""), data.dataValues.userId.replace(/-/g, ""), data.dataValues.view);
+        }
+
+        function insertElement(str) {
+            return str.slice(0, 8) + '-' + str.slice(8, 12) + '-' + str.slice(12, 16) + '-' + str.slice(16, 20) + '-' + str.slice(20);
+        }
+        // insertElement("e1469890b32e4dfdbfb32e52d98c777b",)
+        //console.log(table);
+        let model = recommender.fit(table);
+        //console.log(model);
+        let predictedTable = recommender.transform(table);
+        let recommendBookIds = []
+        for (var i = 0; i < predictedTable.columnNames.length; ++i) {
+            var userId = predictedTable.columnNames[i];
+            if (userId === req.dataAccount.userId.replace(/-/g, "")) {
+                for (var j = 0; j < predictedTable.rowNames.length; ++j) {
+                    var bookId = predictedTable.rowNames[j];
+                    recommendBookIds.push({bookId: insertElement(bookId), score: Math.round(predictedTable.getCell(bookId, userId))})
+                }
+            }           
+        }
+        recommendBookIds.sort((book1, book2) => book1.score - book2.score);
+        if (recommendBookIds.length > 10) {
+            recommendBookIds = recommendBookIds.slice(0, 10);
+        }
+        let bookIds = []
+        for (let book of recommendBookIds) {
+            bookIds.push(book.bookId)
+        }
+        const recommendBook = await Book.findAll({
+            where: {
+                bookId: {
+                    [Op.in]: bookIds
+                }
+            }
+        })
+        for (let book of recommendBook) {
+            book.dataValues.coverImgURL = util.addHost(req, book.dataValues.coverImgURL);
+        }
+        return res.status(200).send(recommendBook)
     } catch (err) {
         console.log(err)
         return res.status(500).send(err)

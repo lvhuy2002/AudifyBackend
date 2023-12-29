@@ -27,6 +27,7 @@ app.use("/api/book", require("./app/router/book.router.js"))
 app.use("/api/category", require("./app/router/category.router.js"))
 app.use("/api/playlist", require("./app/router/playlist.router.js"))
 app.use("/api/assess", require("./app/router/assess.router.js"))
+app.use("/api/init", require("./app/router/init.router.js"))
 // app.get('/*', function (req, res) {
 //     res.sendFile(path.join(__dirname, 'public/index.html'))
 // })
@@ -39,6 +40,6 @@ app.listen(PORT, () => {
 
 const db = require("./app/model")
 
-//db.sequelize.sync({ force: true })
-db.sequelize.sync();
+db.sequelize.sync({ force: true })
+//db.sequelize.sync();
 //db.sequelize.sync({ alter: true });
