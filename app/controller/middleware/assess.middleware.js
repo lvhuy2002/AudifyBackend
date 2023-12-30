@@ -124,7 +124,7 @@ exports.removeAssess = async (req, res) => {
 }
 
 exports.getAssess = async (req, res) => {
-    let {bookId} = req.body;
+    let {bookId} = req.params;
     let {userId} = req.dataAccount;
     if (bookId === undefined || bookId === "" ) {
             return res.status(400).send({ message: "Missing field!" })
@@ -135,7 +135,7 @@ exports.getAssess = async (req, res) => {
         return res.status(500).send({ message: "Error occurred when get assess of book", err: result.err  })
     }
     if (dataAssess.code === -1) {
-        return res.status(500).send({ message: "You hasn't been comment yet" })
+        return res.status(200).send({})
     }
 
     return res.status(200).send(dataAssess);
